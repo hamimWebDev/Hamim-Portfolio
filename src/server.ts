@@ -1,65 +1,47 @@
-import express from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import helmet from 'helmet';
-import morgan from 'morgan';
-import mongoose from 'mongoose';
+import { Server } from "http";
+import mongoose from "mongoose";
+import config from "./app/config";
+import app from "./app";
 
-// Import routes
-import projectRoutes from './routes/projectRoutes';
-import contactRoutes from './routes/contactRoutes';
+let server: Server;
 
-// Load environment variables
-dotenv.config();
-
-// Initialize express
-const app = express();
-const PORT = process.env.PORT || 5000;
-
-// Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cors());
-app.use(helmet());
-app.use(morgan('dev'));
-
-// Connect to MongoDB
-const connectDB = async () => {
+async function main() {
   try {
-    const conn = await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/portfolio');
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
-  } catch (error: any) {
-    console.error(`Error: ${error.message}`);
-    process.exit(1);
-  }
-};
+    await mongoose.connect(config.database_url as string);
+    console.log("Database connected successfully");
 
-// Routes
-app.use('/api/projects', projectRoutes);
-app.use('/api/contact', contactRoutes);
-
-// Health check route
-app.get('/', (req, res) => {
-  res.send('API is running...');
-});
-
-// Error handling middleware
-app.use((err: any, req: any, res: any, next: any) => {
-  const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
-  res.status(statusCode);
-  res.json({
-    message: err.message,
-    stack: process.env.NODE_ENV === 'production' ? null : err.stack
-  });
-});
-
-// Start server
-if (process.env.NODE_ENV !== 'test') {
-  connectDB().then(() => {
-    app.listen(PORT, () => {
-      console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+    // Use server to start the application
+    server = app.listen(config.port, () => {
+      console.log(`App listening on port ${config.port}`);
     });
-  });
+  } catch (error) {
+    console.error("Error starting the application", error);
+    process.exit(1); // Exit the process if initialization fails
+  }
 }
 
-export default app;
+main();
+
+// Handle unhandled promise rejections
+process.on("unhandledRejection", (err) => {
+  console.error("Unhandled Rejection detected. Shutting down the server...", err);
+  if (server) {
+    server.close(() => {
+      process.exit(1);
+    });
+  } else {
+    process.exit(1);
+  }
+});
+
+// Handle uncaught exceptions
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught Exception detected. Shutting down the server...", err);
+  if (server) {
+    server.close(() => {
+      process.exit(1);
+    });
+  } else {
+    process.exit(1);
+  }
+});
