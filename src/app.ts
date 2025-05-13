@@ -2,9 +2,9 @@ import express, { Application, Request, Response } from 'express'
 import cors from 'cors'
 import cockieParser from 'cookie-parser'
 import path from 'path'
-// import notFound from './app/middleware/notFound'
-// import globalErrorHandler from './app/middleware/globalErrorHandlers'
-// import router from './app/routes'
+import globalErrorHandler from './app/middleware/globalErrorHandlers'
+import notFound from './app/middleware/notFound'
+import router from './app/routes'
 
 const app: Application = express()
 
@@ -13,7 +13,7 @@ app.use(express.json())
 app.use(cockieParser())
 
 const allowedOrigins = 'https://recipe-circle-frontend.vercel.app' // Production frontend
-app.use(cors({origin : allowedOrigins, credentials : true}))
+app.use(cors({ origin: allowedOrigins, credentials: true }))
 
 // Serve static files from the 'build' directory
 app.use(express.static(path.join(__dirname, '..', 'build')))
@@ -27,7 +27,7 @@ app.set('view engine', 'ejs') // Set EJS as the view engine
 
 // application routes
 
-// app.use('/api', router)
+app.use('/api', router)
 
 // Test route
 app.get('/', async (req: Request, res: Response) => {
@@ -40,10 +40,10 @@ app.get('*', (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, '..', 'build', 'index.html'))
 })
 
-// // global error handler
-// app.use(globalErrorHandler)
+// global error handler
+app.use(globalErrorHandler)
 
-// // not found route
-// app.use(notFound)
+// not found route
+app.use(notFound)
 
 export default app
