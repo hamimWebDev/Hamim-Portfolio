@@ -12,7 +12,10 @@ const app: Application = express()
 app.use(express.json())
 app.use(cockieParser())
 
-const allowedOrigins = ["https://hamim-portfolio.vercel.app", "http://localhost:3000"] // Production frontend
+const allowedOrigins = [
+  'https://hamim-portfolio.vercel.app',
+  'http://localhost:3000',
+] // Production frontend
 app.use(cors({ origin: allowedOrigins, credentials: true }))
 
 // Serve static files from the 'build' directory
@@ -31,7 +34,12 @@ app.use('/api', router)
 
 // Test route
 app.get('/', async (req: Request, res: Response) => {
-  const message = 'Md. Hamim Howlader Asif server is running'
+  interface TestRouteResponse {
+    message: string
+  }
+
+  const message: TestRouteResponse['message'] =
+    "Md. Hamim Howlader Asif's server is running"
   res.send(message)
 })
 
