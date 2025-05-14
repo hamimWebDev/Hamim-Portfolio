@@ -31,12 +31,8 @@ app.use('/api', router)
 
 // Test route
 app.get('/', async (req: Request, res: Response) => {
-  interface TestRouteResponse {
-    message: string;
-  }
-
-  const message: TestRouteResponse['message'] = "Md. Hamim Howlader Asif's server is running";
-  res.send(message);
+  const message = 'Md. Hamim Howlader Asif server is running'
+  res.send(message)
 })
 
 // Catch-all route for client-side routing
