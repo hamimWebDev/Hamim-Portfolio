@@ -6,7 +6,7 @@ import sendResponse from '../../utils/sendResponse'
 
 const addExperience = catchAsync(async (req: Request, res: Response) => {
   const experienceData = req.body
-  const file = req.file
+  const file = req?.file;
   // Call the service to add the experience to the database
   const result = await JourneyServices.addExperienceToDb(experienceData, file)
   sendResponse(res, {
@@ -19,8 +19,9 @@ const addExperience = catchAsync(async (req: Request, res: Response) => {
 
 // Controller for adding a skill
 const addSkill = catchAsync(async (req: Request, res: Response) => {
-  const payload = req.body
-  const result = await JourneyServices.addSkillToDb(payload)
+  const payload = req.body;
+  const file = req?.file;
+  const result = await JourneyServices.addSkillToDb(payload, file)
   sendResponse(res, {
     statusCode: httpStatus.CREATED,
     success: true,
@@ -54,12 +55,23 @@ const getAllJourneys = catchAsync(async (_req: Request, res: Response) => {
     data: result,
   })
 })
+// Controller for retrieving all entries
+const getSingleJourney = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params
+  const result = await JourneyServices.getSingleJourney(id)
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Journeys retrieved successfully',
+    data: result,
+  })
+})
 
 // Controller for updating an entry
 const updateJourney = catchAsync(async (req: Request, res: Response) => {
-  const { id } = req.params
-  const payload = req.body
-  const result = await JourneyServices.updateJourneyInDb(id, payload)
+  const { id } = req.params;
+  const payload = req.body;
+  const result = await JourneyServices.updateJourneyInDb(id, payload, req.file)
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -87,4 +99,5 @@ export const JourneyControllers = {
   deleteJourney,
   updateJourney,
   getAllJourneys,
+  getSingleJourney
 }
